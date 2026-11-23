@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Customer Lead & Follow-up Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'IBM Plex Sans Thai', sans-serif;
+      background-color: #f8fafc;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="text-slate-800 antialiased">
+
+  <!-- Top Navigation Bar -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between py-4 gap-3">
+        <!-- Brand & Sync Status -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shadow-sm">
+              L
+            </div>
+            <div>
+              <h1 class="text-lg sm:text-xl font-bold text-slate-900 leading-tight">ระบบติดตามลูกค้า (Lead Dashboard)</h1>
+              <div class="flex items-center gap-2 text-xs text-slate-500 mt-0.5">
+                <span id="syncIndicator" class="inline-flex items-center gap-1.5 font-medium text-amber-600">
+                  <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                  โหมดทดลองในเครื่อง (ยังไม่เชื่อม Sheets)
+                </span>
+                <span id="lastSyncText" class="text-slate-400"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="fetchLeads(true)" id="btnRefresh" class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            รีเฟรช
+          </button>
+
+          <button onclick="openSettingsModal()" class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition">
+            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            ตั้งค่า Sheets
+          </button>
+
+          <button onclick="openAddModal()" class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 shadow-sm transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            เพิ่มลูกค้าใหม่ (วางข้อความ)
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter Tabs & Search -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-t border-slate-100">
+        <!-- 4 Top Filter Menus -->
+        <nav class="flex flex-wrap gap-1.5" id="filterTabs">
+          <button data-filter="all" onclick="setFilter('all')" class="filter-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition bg-slate-900 text-white">
+            ทั้งหมด <span id="count-all" class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-white/20">0</span>
+          </button>
+          <button data-filter="pending_call" onclick="setFilter('pending_call')" class="filter-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition bg-slate-100 text-slate-600 hover:bg-slate-200">
+            รอโทร <span id="count-pending_call" class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-amber-100 text-amber-800">0</span>
+          </button>
+          <button data-filter="called" onclick="setFilter('called')" class="filter-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition bg-slate-100 text-slate-600 hover:bg-slate-200">
+            โทรแล้ว <span id="count-called" class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-800">0</span>
+          </button>
+          <button data-filter="emailed" onclick="setFilter('emailed')" class="filter-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition bg-slate-100 text-slate-600 hover:bg-slate-200">
+            ส่งอีเมล์แล้ว <span id="count-emailed" class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800">0</span>
+          </button>
+        </nav>
+
+        <!-- Search Box -->
+        <div class="relative w-full sm:w-72">
+          <input type="text" id="searchInput" oninput="renderLeads()" placeholder="ค้นหาชื่อ, เบอร์โทร, อีเมล, โน้ต..." class="w-full pl-9 pr-3 py-1.5 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition" />
+          <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <!-- Loading State -->
+    <div id="loadingBanner" class="hidden mb-4 p-3 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-sm flex items-center gap-2">
+      <svg class="animate-spin h-4 w-4 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+      <span>กำลังซิงค์ข้อมูลกับ Google Sheets...</span>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden text-center py-16 bg-white rounded-2xl border border-dashed border-slate-300">
+      <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+      </div>
+      <h3 class="text-base font-semibold text-slate-800">ไม่พบข้อมูลลูกค้าในหมวดนี้</h3>
+      <p class="text-sm text-slate-500 mt-1">กดปุ่ม "+ เพิ่มลูกค้าใหม่ (วางข้อความ)" เพื่อนำเข้าข้อมูลลูกค้าที่ทักเข้ามา</p>
+    </div>
+
+    <!-- Leads Grid -->
+    <div id="leadsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-5"></div>
+  </main>
+
+  <!-- Modal: Add Lead (Smart Paste & Auto-Parse) -->
+  <div id="addModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-bold text-slate-900">เพิ่มลูกค้าใหม่ (วางข้อความที่ลูกค้าทักเข้ามา)</h2>
+          <p class="text-xs text-slate-500">ก๊อปปี้ข้อความจากแชทหรือฟอร์มมาวางฝั่งซ้าย ระบบจะแยกข้อมูลให้อัตโนมัติ</p>
+        </div>
+        <button onclick="closeAddModal()" class="text-slate-400 hover:text-slate-600 p-1">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div class="p-6 overflow-y-auto custom-scrollbar grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Left: Raw Paste Area -->
+        <div class="flex flex-col">
+          <div class="flex items-center justify-between mb-2">
+            <label class="text-sm font-semibold text-slate-700">1. วางข้อความต้นฉบับที่นี่</label>
+            <button type="button" onclick="fillSampleText()" class="text-xs text-emerald-600 hover:underline font-medium">ใส่ข้อความตัวอย่าง</button>
+          </div>
+          <textarea id="rawPasteInput" oninput="parseRawText(this.value)" rows="14" placeholder="วางข้อความลูกค้า เช่น:
+คุณสนใจวางแผนเรื่องใด?: จัดสวัสดิการประกันชีวิตให้กรรมการ
+ปัจจุบันคุณมีบทบาทใดในกิจการ?: กรรมการบริษัท
+Email: example@gmail.com
+Full name: ชื่อ นามสกุล
+Phone number: 089 000 0000" class="w-full p-3 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 focus:bg-white font-normal leading-relaxed"></textarea>
+        </div>
+
+        <!-- Right: Parsed Preview Form -->
+        <div class="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div class="text-sm font-semibold text-slate-700 border-b border-slate-200 pb-2">2. ตรวจสอบข้อมูลที่แยกได้</div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">ชื่อ-นามสกุล *</label>
+              <input type="text" id="parseFullName" class="w-full px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">เบอร์โทรศัพท์</label>
+              <input type="text" id="parsePhone" class="w-full px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">อีเมล</label>
+              <input type="email" id="parseEmail" class="w-full px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">บทบาทในกิจการ</label>
+              <input type="text" id="parseRole" class="w-full px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">สวัสดิการประกันชีวิตเดิม</label>
+              <input type="text" id="parseExistingBenefit" class="w-full px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">รูปแบบการรับข้อมูล</label>
+              <input type="text" id="parsePreferredContact" class="w-full px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">เรื่องที่สนใจวางแผน (แยกบรรทัดอัตโนมัติ)</label>
+            <div id="parseInterestsContainer" class="flex flex-wrap gap-1.5 min-h-[34px] p-2 bg-white border border-slate-300 rounded-lg mb-1.5"></div>
+            <div class="flex gap-1.5">
+              <input type="text" id="newTagInput" onkeypress="if(event.key==='Enter'){event.preventDefault();addInterestTag();}" placeholder="เพิ่มหัวข้อที่สนใจ..." class="flex-1 px-2.5 py-1 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              <button type="button" onclick="addInterestTag()" class="px-2.5 py-1 text-xs font-medium bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg">เพิ่มแท็ก</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-3">
+        <button onclick="closeAddModal()" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">ยกเลิก</button>
+        <button onclick="saveNewLead()" id="btnSaveNewLead" class="px-5 py-2 text-sm font-semibold text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 shadow-sm">บันทึกลง Dashboard</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Google Sheets Settings -->
+  <div id="settingsModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+        <h2 class="text-lg font-bold text-slate-900">ตั้งค่าการเชื่อมต่อ Google Sheets</h2>
+        <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-slate-600 p-1">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div class="p-6 space-y-4">
+        <div>
+          <label class="block text-sm font-semibold text-slate-700 mb-1">Google Apps Script Web App URL (/exec)</label>
+          <input type="url" id="scriptUrlInput" placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+          <p class="text-xs text-slate-500 mt-1.5 leading-relaxed">
+            วาง URL ที่ได้จากการ Deploy Web App ใน Google Apps Script เพื่อให้ข้อมูลซิงค์กับทีมงานทุกคน (หากเว้นว่าง ระบบจะเก็บข้อมูลชั่วคราวในเบราว์เซอร์เครื่องนี้)
+          </p>
+        </div>
+        <div id="testConnectionResult" class="hidden text-xs p-3 rounded-lg"></div>
+      </div>
+      <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+        <button onclick="testConnection()" class="px-3.5 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50">ทดสอบการเชื่อมต่อ</button>
+        <div class="flex gap-2">
+          <button onclick="closeSettingsModal()" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800">ปิด</button>
+          <button onclick="saveSettings()" class="px-4 py-2 text-sm font-semibold text-white bg-emerald-600 rounded-lg hover:bg-emerald-700">บันทึกการตั้งค่า</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Raw Text Viewer -->
+  <div id="rawViewModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+        <h3 class="text-base font-bold text-slate-900">ข้อความต้นฉบับที่ลูกค้าส่งเข้ามา</h3>
+        <button onclick="document.getElementById('rawViewModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div class="p-6">
+        <pre id="rawViewContent" class="whitespace-pre-wrap text-sm text-slate-700 bg-slate-50 p-4 rounded-xl border border-slate-200 font-sans leading-relaxed max-h-80 overflow-y-auto"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white text-sm px-4 py-3 rounded-xl shadow-lg flex items-center gap-2">
+    <span id="toastMessage">บันทึกเรียบร้อย</span>
+  </div>
+
+  <script>
+    // =========================================================================
+    // 1. วาง Google Apps Script Web App URL (/exec) ของคุณตรงนี้ เพื่อให้ทีมใช้งานได้ทันที
+    // =========================================================================
+    const DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4ddZTBAv-tpACMilYp10bIwTollc3XpghSJHHyHNA6ILwpDe6knmbXpad5qvh7bBNmA/exec";
+
+    const STORAGE_KEY_URL = "lead_dashboard_gas_url_v1";
+    const STORAGE_KEY_LOCAL_DATA = "lead_dashboard_local_data_v1";
+
+    let leads = [];
+    let currentFilter = "all";
+    let parsedInterests = [];
+    let isTypingNote = false;
+    let autoSyncTimer = null;
+
+    function getScriptUrl() {
+      const saved = localStorage.getItem(STORAGE_KEY_URL);
+      return (saved !== null ? saved : DEFAULT_SCRIPT_URL).trim();
+    }
+
+    // =========================================================================
+    // 2. การดึงและบันทึกข้อมูล (Google Sheets API / Local Fallback)
+    // =========================================================================
+    async function fetchLeads(showToastMsg = false) {
+      const url = getScriptUrl();
+      updateSyncStatusUI(url);
+
+      if (!url) {
+        // โหมดทดลองในเครื่อง (Local Storage)
+        const localRaw = localStorage.getItem(STORAGE_KEY_LOCAL_DATA);
+        if (localRaw) {
+          leads = JSON.parse(localRaw);
+        } else {
+          leads = getInitialSampleLeads();
+          localStorage.setItem(STORAGE_KEY_LOCAL_DATA, JSON.stringify(leads));
+        }
+        renderLeads();
+        if (showToastMsg) showToast("รีเฟรชข้อมูลในเครื่องแล้ว");
+        return;
+      }
+
+      const banner = document.getElementById("loadingBanner");
+      banner.classList.remove("hidden");
+      try {
+        const res = await fetch(url, { method: "GET" });
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error || "ไม่สามารถดึงข้อมูลได้");
+        leads = Array.isArray(data.leads) ? data.leads : [];
+        document.getElementById("lastSyncText").textContent = "อัปเดตล่าสุด: " + new Date().toLocaleTimeString("th-TH");
+        renderLeads();
+        if (showToastMsg) showToast("ซิงค์ข้อมูลจาก Google Sheets สำเร็จ");
+      } catch (err) {
+        console.error(err);
+        showToast("เกิดข้อผิดพลาดในการดึงข้อมูล: " + err.message);
+      } finally {
+        banner.classList.add("hidden");
+      }
+    }
+
+    async function upsertLeadToBackend(leadObj) {
+      const url = getScriptUrl();
+      if (!url) {
+        const idx = leads.findIndex(item => item.id === leadObj.id);
+        if (idx !== -1) {
+          leads[idx] = { ...leads[idx], ...leadObj, updatedAt: new Date().toISOString() };
+        } else {
+          leads.unshift({ ...leadObj, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+        }
+        localStorage.setItem(STORAGE_KEY_LOCAL_DATA, JSON.stringify(leads));
+        renderLeads();
+        return;
+      }
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "upsert", data: leadObj })
+      });
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || "บันทึกข้อมูลไม่สำเร็จ");
+
+      const idx = leads.findIndex(item => item.id === data.lead.id);
+      if (idx !== -1) {
+        leads[idx] = data.lead;
+      } else {
+        leads.unshift(data.lead);
+      }
+      document.getElementById("lastSyncText").textContent = "อัปเดตล่าสุด: " + new Date().toLocaleTimeString("th-TH");
+      renderLeads();
+    }
+
+    async function deleteLeadById(id) {
+      if (!confirm("ต้องการลบข้อมูลลูกค้ารายนี้ออกจากระบบใช่หรือไม่?")) return;
+      const url = getScriptUrl();
+
+      // Optimistic UI remove
+      const backup = [...leads];
+      leads = leads.filter(l => l.id !== id);
+      renderLeads();
+
+      if (!url) {
+        localStorage.setItem(STORAGE_KEY_LOCAL_DATA, JSON.stringify(leads));
+        showToast("ลบข้อมูลเรียบร้อย");
+        return;
+      }
+
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "delete", id })
+        });
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error || "ลบข้อมูลไม่สำเร็จ");
+        showToast("ลบข้อมูลออกจาก Google Sheets แล้ว");
+      } catch (err) {
+        leads = backup;
+        renderLeads();
+        showToast("ลบข้อมูลไม่สำเร็จ: " + err.message);
+      }
+    }
+
+    // =========================================================================
+    // 3. การอัปเดตสถานะ 5 รายการบนการ์ดลูกค้า
+    // =========================================================================
+    async function toggleField(id, field) {
+      const lead = leads.find(l => l.id === id);
+      if (!lead) return;
+      const updated = { ...lead, [field]: !lead[field] };
+      // Optimistic update
+      Object.assign(lead, updated);
+      renderLeads();
+      try {
+        await upsertLeadToBackend(updated);
+        showToast("บันทึกสถานะแล้ว");
+      } catch (err) {
+        showToast("บันทึกไม่สำเร็จ: " + err.message);
+        fetchLeads();
+      }
+    }
+
+    async function setInterestStatus(id, status) {
+      const lead = leads.find(l => l.id === id);
+      if (!lead) return;
+      const updated = { ...lead, interestStatus: status };
+      Object.assign(lead, updated);
+      renderLeads();
+      try {
+        await upsertLeadToBackend(updated);
+        showToast("อัปเดตสถานะความสนใจแล้ว");
+      } catch (err) {
+        showToast("บันทึกไม่สำเร็จ: " + err.message);
+        fetchLeads();
+      }
+    }
+
+    async function saveNote(id) {
+      const lead = leads.find(l => l.id === id);
+      const textarea = document.getElementById("note-" + id);
+      if (!lead || !textarea) return;
+      const newNote = textarea.value;
+      if (lead.notes === newNote) return;
+
+      const updated = { ...lead, notes: newNote };
+      Object.assign(lead, updated);
+      try {
+        await upsertLeadToBackend(updated);
+        showToast("บันทึกข้อความเพิ่มเติมแล้ว");
+      } catch (err) {
+        showToast("บันทึกโน้ตไม่สำเร็จ: " + err.message);
+      }
+    }
+
+    // =========================================================================
+    // 4. Smart Parser แยกข้อความที่ลูกค้าทักเข้ามาอัตโนมัติ
+    // =========================================================================
+    function parseRawText(text) {
+      const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const interests = [];
+      let role = "";
+      let preferredContact = "";
+      let email = "";
+      let existingBenefit = "";
+      let fullName = "";
+      let phone = "";
+
+      for (const line of lines) {
+        const sepIdx = line.indexOf(":");
+        if (sepIdx === -1) continue;
+        const key = line.slice(0, sepIdx).trim().toLowerCase();
+        const val = line.slice(sepIdx + 1).trim();
+        if (!val) continue;
+
+        if (key.includes("สนใจวางแผน")) {
+          if (!interests.includes(val)) interests.push(val);
+        } else if (key.includes("บทบาท")) {
+          role = val;
+        } else if (key.includes("รูปแบบใด") || key.includes("รับข้อมูล")) {
+          preferredContact = val;
+        } else if (key.includes("email") || key.includes("อีเมล")) {
+          email = val;
+        } else if (key.includes("สวัสดิการ") || key.includes("อยู่แล้วหรือไม่")) {
+          existingBenefit = val;
+        } else if (key.includes("full name") || key.includes("ชื่อ")) {
+          fullName = val;
+        } else if (key.includes("phone") || key.includes("เบอร์") || key.includes("โทร")) {
+          phone = val;
+        }
+      }
+
+      document.getElementById("parseFullName").value = fullName;
+      document.getElementById("parsePhone").value = phone;
+      document.getElementById("parseEmail").value = email;
+      document.getElementById("parseRole").value = role;
+      document.getElementById("parseExistingBenefit").value = existingBenefit;
+      document.getElementById("parsePreferredContact").value = preferredContact;
+
+      parsedInterests = interests;
+      renderParsedInterests();
+    }
+
+    function renderParsedInterests() {
+      const container = document.getElementById("parseInterestsContainer");
+      if (parsedInterests.length === 0) {
+        container.innerHTML = '<span class="text-xs text-slate-400">ยังไม่มีหัวข้อที่สนใจ...</span>';
+        return;
+      }
+      container.innerHTML = parsedInterests.map((tag, idx) => `
+        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+          ${escapeHtml(tag)}
+          <button type="button" onclick="removeInterestTag(${idx})" class="hover:text-emerald-950 font-bold">&times;</button>
+        </span>
+      `).join("");
+    }
+
+    function addInterestTag() {
+      const input = document.getElementById("newTagInput");
+      const val = input.value.trim();
+      if (val && !parsedInterests.includes(val)) {
+        parsedInterests.push(val);
+        renderParsedInterests();
+      }
+      input.value = "";
+    }
+
+    function removeInterestTag(idx) {
+      parsedInterests.splice(idx, 1);
+      renderParsedInterests();
+    }
+
+    async function saveNewLead() {
+      const fullName = document.getElementById("parseFullName").value.trim();
+      if (!fullName) {
+        alert("กรุณาระบุชื่อ-นามสกุลของลูกค้า");
+        return;
+      }
+
+      const btn = document.getElementById("btnSaveNewLead");
+      btn.disabled = true;
+      btn.textContent = "กำลังบันทึก...";
+
+      const newLead = {
+        id: "lead_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+        createdAt: new Date().toISOString(),
+        fullName,
+        phone: document.getElementById("parsePhone").value.trim(),
+        email: document.getElementById("parseEmail").value.trim(),
+        interests: [...parsedInterests],
+        role: document.getElementById("parseRole").value.trim(),
+        existingBenefit: document.getElementById("parseExistingBenefit").value.trim(),
+        preferredContact: document.getElementById("parsePreferredContact").value.trim(),
+        called: false,
+        emailed: false,
+        interestStatus: "pending",
+        appointed: false,
+        notes: "",
+        rawText: document.getElementById("rawPasteInput").value.trim()
+      };
+
+      try {
+        await upsertLeadToBackend(newLead);
+        closeAddModal();
+        showToast("เพิ่มข้อมูลลูกค้า " + fullName + " เรียบร้อย");
+      } catch (err) {
+        alert("เกิดข้อผิดพลาด: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "บันทึกลง Dashboard";
+      }
+    }
+
+    // =========================================================================
+    // 5. การแสดงผลและการกรองข้อมูล (Filter & Render)
+    // =========================================================================
+    function setFilter(filter) {
+      currentFilter = filter;
+      document.querySelectorAll(".filter-btn").forEach(btn => {
+        if (btn.dataset.filter === filter) {
+          btn.className = "filter-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition bg-slate-900 text-white";
+        } else {
+          btn.className = "filter-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition bg-slate-100 text-slate-600 hover:bg-slate-200";
+        }
+      });
+      renderLeads();
+    }
+
+    function renderLeads() {
+      // Update counters
+      document.getElementById("count-all").textContent = leads.length;
+      document.getElementById("count-pending_call").textContent = leads.filter(l => !l.called).length;
+      document.getElementById("count-called").textContent = leads.filter(l => l.called).length;
+      document.getElementById("count-emailed").textContent = leads.filter(l => l.emailed).length;
+
+      const query = document.getElementById("searchInput").value.trim().toLowerCase();
+
+      const filtered = leads.filter(lead => {
+        if (currentFilter === "pending_call" && lead.called) return false;
+        if (currentFilter === "called" && !lead.called) return false;
+        if (currentFilter === "emailed" && !lead.emailed) return false;
+
+        if (query) {
+          const hay = [
+            lead.fullName,
+            lead.phone,
+            lead.email,
+            lead.role,
+            lead.notes,
+            ...(lead.interests || [])
+          ].join(" ").toLowerCase();
+          if (!hay.includes(query)) return false;
+        }
+        return true;
+      });
+
+      const container = document.getElementById("leadsContainer");
+      const emptyState = document.getElementById("emptyState");
+
+      if (filtered.length === 0) {
+        container.innerHTML = "";
+        emptyState.classList.remove("hidden");
+        return;
+      }
+
+      emptyState.classList.add("hidden");
+      container.innerHTML = filtered.map(lead => renderLeadCard(lead)).join("");
+    }
+
+    function renderLeadCard(lead) {
+      const dateStr = lead.createdAt
+        ? new Date(lead.createdAt).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "2-digit", hour: "2-digit", minute: "2-digit" })
+        : "";
+
+      const interestsHtml = (lead.interests && lead.interests.length > 0)
+        ? lead.interests.map(i => `<span class="px-2.5 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">${escapeHtml(i)}</span>`).join("")
+        : `<span class="text-xs text-slate-400">-</span>`;
+
+      const statusBtnClass = (val, activeClasses) =>
+        lead.interestStatus === val
+          ? activeClasses + " font-semibold shadow-sm"
+          : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50";
+
+      return `
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition p-5 flex flex-col justify-between gap-4">
+          <!-- Card Header -->
+          <div>
+            <div class="flex items-start justify-between gap-2">
+              <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h3 class="text-lg font-bold text-slate-900">${escapeHtml(lead.fullName)}</h3>
+                  ${lead.role ? `<span class="px-2 py-0.5 text-xs font-medium rounded-md bg-slate-100 text-slate-700">${escapeHtml(lead.role)}</span>` : ""}
+                </div>
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-sm text-slate-600">
+                  ${lead.phone ? `
+                    <div class="inline-flex items-center gap-1.5">
+                      <a href="tel:${escapeHtml(lead.phone.replace(/\s+/g, ''))}" class="font-medium text-slate-800 hover:text-emerald-600">${escapeHtml(lead.phone)}</a>
+                      <button onclick="copyText('${escapeHtml(lead.phone)}', 'คัดลอกเบอร์โทรแล้ว')" title="คัดลอกเบอร์โทร" class="text-slate-400 hover:text-slate-700">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                      </button>
+                    </div>
+                  ` : ""}
+                  ${lead.email ? `
+                    <div class="inline-flex items-center gap-1.5">
+                      <a href="mailto:${escapeHtml(lead.email)}" class="text-slate-600 hover:text-blue-600">${escapeHtml(lead.email)}</a>
+                      <button onclick="copyText('${escapeHtml(lead.email)}', 'คัดลอกอีเมลแล้ว')" title="คัดลอกอีเมล" class="text-slate-400 hover:text-slate-700">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                      </button>
+                    </div>
+                  ` : ""}
+                </div>
+              </div>
+
+              <div class="flex items-center gap-1">
+                ${lead.rawText ? `
+                  <button onclick="viewRawText('${lead.id}')" title="ดูข้อความต้นฉบับ" class="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                  </button>
+                ` : ""}
+                <button onclick="deleteLeadById('${lead.id}')" title="ลบรายการ" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Metadata Badges -->
+            <div class="grid grid-cols-2 gap-2 mt-3 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs">
+              <div>
+                <span class="text-slate-400 block">สวัสดิการเดิม:</span>
+                <span class="font-medium text-slate-700">${escapeHtml(lead.existingBenefit || "-")}</span>
+              </div>
+              <div>
+                <span class="text-slate-400 block">รูปแบบที่ต้องการ:</span>
+                <span class="font-medium text-slate-700">${escapeHtml(lead.preferredContact || "-")}</span>
+              </div>
+            </div>
+
+            <!-- Interests Tags -->
+            <div class="mt-3">
+              <div class="text-xs font-medium text-slate-500 mb-1.5">หัวข้อที่สนใจวางแผน:</div>
+              <div class="flex flex-wrap gap-1.5">${interestsHtml}</div>
+            </div>
+          </div>
+
+          <!-- Tracking Controls (5 Items) -->
+          <div class="pt-3 border-t border-slate-100 space-y-3">
+            <!-- Checkboxes: 1. โทรแล้ว | 2. ส่งอีเมล์แล้ว | 4. นัดหมายแล้ว -->
+            <div class="grid grid-cols-3 gap-2">
+              <label class="flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl border text-xs font-medium cursor-pointer select-none transition ${lead.called ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}">
+                <input type="checkbox" ${lead.called ? "checked" : ""} onchange="toggleField('${lead.id}', 'called')" class="rounded text-emerald-600 focus:ring-emerald-500" />
+                <span>โทรแล้ว</span>
+              </label>
+
+              <label class="flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl border text-xs font-medium cursor-pointer select-none transition ${lead.emailed ? 'bg-blue-50 border-blue-300 text-blue-800' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}">
+                <input type="checkbox" ${lead.emailed ? "checked" : ""} onchange="toggleField('${lead.id}', 'emailed')" class="rounded text-blue-600 focus:ring-blue-500" />
+                <span>ส่งอีเมล์แล้ว</span>
+              </label>
+
+              <label class="flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl border text-xs font-medium cursor-pointer select-none transition ${lead.appointed ? 'bg-purple-50 border-purple-300 text-purple-800' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}">
+                <input type="checkbox" ${lead.appointed ? "checked" : ""} onchange="toggleField('${lead.id}', 'appointed')" class="rounded text-purple-600 focus:ring-purple-500" />
+                <span>นัดหมายแล้ว</span>
+              </label>
+            </div>
+
+            <!-- 3. สนใจ / ไม่สนใจ -->
+            <div class="flex items-center justify-between gap-2">
+              <span class="text-xs font-medium text-slate-500">ผลการติดตาม:</span>
+              <div class="inline-flex rounded-lg border border-slate-200 p-0.5 bg-slate-50">
+                <button type="button" onclick="setInterestStatus('${lead.id}', 'pending')" class="px-2.5 py-1 text-xs rounded-md border border-transparent transition ${statusBtnClass('pending', 'bg-white text-slate-800 border-slate-200')}">รอประเมิน</button>
+                <button type="button" onclick="setInterestStatus('${lead.id}', 'interested')" class="px-2.5 py-1 text-xs rounded-md border border-transparent transition ${statusBtnClass('interested', 'bg-emerald-600 text-white')}">สนใจ</button>
+                <button type="button" onclick="setInterestStatus('${lead.id}', 'not_interested')" class="px-2.5 py-1 text-xs rounded-md border border-transparent transition ${statusBtnClass('not_interested', 'bg-rose-600 text-white')}">ไม่สนใจ</button>
+              </div>
+            </div>
+
+            <!-- 5. ช่องเพิ่มเติมข้อความหลังโทรคุย -->
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-xs font-medium text-slate-500">บันทึกเพิ่มเติมหลังโทรคุย:</label>
+                ${dateStr ? `<span class="text-[11px] text-slate-400">เพิ่มเมื่อ: ${dateStr}</span>` : ""}
+              </div>
+              <div class="flex gap-1.5">
+                <textarea id="note-${lead.id}" rows="2" onfocus="isTypingNote=true" onblur="isTypingNote=false;saveNote('${lead.id}')" placeholder="พิมพ์รายละเอียดเพิ่มเติมที่ได้จากการโทรคุย..." class="flex-1 px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition">${escapeHtml(lead.notes || "")}</textarea>
+                <button type="button" onclick="saveNote('${lead.id}')" class="px-3 py-1.5 text-xs font-medium bg-slate-800 text-white rounded-xl hover:bg-slate-700 self-end">บันทึก</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // =========================================================================
+    // 6. Modals & Utilities
+    // =========================================================================
+    function openAddModal() {
+      document.getElementById("rawPasteInput").value = "";
+      parseRawText("");
+      document.getElementById("addModal").classList.remove("hidden");
+    }
+
+    function closeAddModal() {
+      document.getElementById("addModal").classList.add("hidden");
+    }
+
+    function fillSampleText() {
+      const sample = `คุณสนใจวางแผนเรื่องใด?: จัดสวัสดิการประกันชีวิตให้กรรมการ
+คุณสนใจวางแผนเรื่องใด?: ต้องการศึกษาทั้งหมด
+คุณสนใจวางแผนเรื่องใด?: วางแผนเงินเกษียณหรือมรดกให้กรรมการ
+คุณสนใจวางแผนเรื่องใด?: วางแผนภาษีและค่าใช้จ่ายบริษัท
+ปัจจุบันคุณมีบทบาทใดในกิจการ?: กรรมการบริษัท / กรรมการผู้จัดการ
+ต้องการรับข้อมูลในรูปแบบใด?: นัดหมายพูดคุยรายละเอียด
+Email: Mr.chatchait@gmail.com
+บริษัทมีการจัดสวัสดิการประกันชีวิตให้กรรมการอยู่แล้วหรือไม่?: ยังไม่มี
+Full name: ฉัตรชัย เทิดสุขบดี
+Phone number: 089 024 6379`;
+      document.getElementById("rawPasteInput").value = sample;
+      parseRawText(sample);
+    }
+
+    function openSettingsModal() {
+      document.getElementById("scriptUrlInput").value = getScriptUrl();
+      document.getElementById("testConnectionResult").classList.add("hidden");
+      document.getElementById("settingsModal").classList.remove("hidden");
+    }
+
+    function closeSettingsModal() {
+      document.getElementById("settingsModal").classList.add("hidden");
+    }
+
+    async function testConnection() {
+      const url = document.getElementById("scriptUrlInput").value.trim();
+      const box = document.getElementById("testConnectionResult");
+      box.classList.remove("hidden");
+      if (!url) {
+        box.className = "text-xs p-3 rounded-lg bg-amber-50 text-amber-800 border border-amber-200";
+        box.textContent = "กรุณาวางลิงก์ Web App URL ก่อนทดสอบ";
+        return;
+      }
+      box.className = "text-xs p-3 rounded-lg bg-blue-50 text-blue-800 border border-blue-200";
+      box.textContent = "กำลังทดสอบการเชื่อมต่อกับ Google Apps Script...";
+      try {
+        const res = await fetch(url, { method: "GET" });
+        const data = await res.json();
+        if (data.ok) {
+          box.className = "text-xs p-3 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200";
+          box.textContent = "เชื่อมต่อสำเร็จ! พบข้อมูลลูกค้าในชีตจำนวน " + (data.leads ? data.leads.length : 0) + " รายการ";
+        } else {
+          throw new Error(data.error || "รูปแบบการตอบกลับไม่ถูกต้อง");
+        }
+      } catch (err) {
+        box.className = "text-xs p-3 rounded-lg bg-rose-50 text-rose-800 border border-rose-200";
+        box.textContent = "เชื่อมต่อไม่สำเร็จ: " + err.message + " (ตรวจสอบว่า Deploy เป็น Anyone แล้ว)";
+      }
+    }
+
+    function saveSettings() {
+      const url = document.getElementById("scriptUrlInput").value.trim();
+      localStorage.setItem(STORAGE_KEY_URL, url);
+      closeSettingsModal();
+      fetchLeads(true);
+    }
+
+    function viewRawText(id) {
+      const lead = leads.find(l => l.id === id);
+      if (!lead) return;
+      document.getElementById("rawViewContent").textContent = lead.rawText || "";
+      document.getElementById("rawViewModal").classList.remove("hidden");
+    }
+
+    function updateSyncStatusUI(url) {
+      const el = document.getElementById("syncIndicator");
+      if (url) {
+        el.className = "inline-flex items-center gap-1.5 font-medium text-emerald-600";
+        el.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> เชื่อมต่อ Google Sheets แล้ว';
+      } else {
+        el.className = "inline-flex items-center gap-1.5 font-medium text-amber-600";
+        el.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500"></span> โหมดทดลองในเครื่อง (ยังไม่เชื่อม Sheets)';
+      }
+    }
+
+    function copyText(text, msg) {
+      navigator.clipboard.writeText(text);
+      showToast(msg || "คัดลอกแล้ว");
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      document.getElementById("toastMessage").textContent = msg;
+      toast.classList.remove("translate-y-20", "opacity-0");
+      setTimeout(() => {
+        toast.classList.add("translate-y-20", "opacity-0");
+      }, 2600);
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function getInitialSampleLeads() {
+      return [
+        {
+          id: "lead_sample_1",
+          createdAt: new Date().toISOString(),
+          fullName: "ฉัตรชัย เทิดสุขบดี",
+          phone: "089 024 6379",
+          email: "Mr.chatchait@gmail.com",
+          interests: [
+            "จัดสวัสดิการประกันชีวิตให้กรรมการ",
+            "ต้องการศึกษาทั้งหมด",
+            "วางแผนเงินเกษียณหรือมรดกให้กรรมการ",
+            "วางแผนภาษีและค่าใช้จ่ายบริษัท"
+          ],
+          role: "กรรมการบริษัท / กรรมการผู้จัดการ",
+          existingBenefit: "ยังไม่มี",
+          preferredContact: "นัดหมายพูดคุยรายละเอียด",
+          called: false,
+          emailed: false,
+          interestStatus: "pending",
+          appointed: false,
+          notes: "",
+          rawText: `คุณสนใจวางแผนเรื่องใด?: จัดสวัสดิการประกันชีวิตให้กรรมการ\nคุณสนใจวางแผนเรื่องใด?: ต้องการศึกษาทั้งหมด\nคุณสนใจวางแผนเรื่องใด?: วางแผนเงินเกษียณหรือมรดกให้กรรมการ\nคุณสนใจวางแผนเรื่องใด?: วางแผนภาษีและค่าใช้จ่ายบริษัท\nปัจจุบันคุณมีบทบาทใดในกิจการ?: กรรมการบริษัท / กรรมการผู้จัดการ\nต้องการรับข้อมูลในรูปแบบใด?: นัดหมายพูดคุยรายละเอียด\nEmail: Mr.chatchait@gmail.com\nบริษัทมีการจัดสวัสดิการประกันชีวิตให้กรรมการอยู่แล้วหรือไม่?: ยังไม่มี\nFull name: ฉัตรชัย เทิดสุขบดี\nPhone number: 089 024 6379`
+        }
+      ];
+    }
+
+    // Auto-sync every 20 seconds when connected to Google Sheets and not typing notes
+    function startAutoSync() {
+      if (autoSyncTimer) clearInterval(autoSyncTimer);
+      autoSyncTimer = setInterval(() => {
+        if (getScriptUrl() && !isTypingNote && document.visibilityState === "visible") {
+          fetchLeads(false);
+        }
+      }, 20000);
+    }
+
+    // Init
+    fetchLeads(false);
+    startAutoSync();
+  </script>
+</body>
+</html>
