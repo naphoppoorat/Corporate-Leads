@@ -86,6 +86,15 @@
           <button data-filter="emailed" onclick="setFilter('emailed')" class="filter-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition bg-slate-100 text-slate-600 hover:bg-slate-200">
             ส่งอีเมล์แล้ว <span id="count-emailed" class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800">0</span>
           </button>
+          <button data-filter="interested" onclick="setFilter('interested')" class="filter-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition bg-slate-100 text-slate-600 hover:bg-slate-200">
+            สนใจ <span id="count-interested" class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-800">0</span>
+          </button>
+          <button data-filter="not_interested" onclick="setFilter('not_interested')" class="filter-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition bg-slate-100 text-slate-600 hover:bg-slate-200">
+            ไม่สนใจ <span id="count-not_interested" class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-rose-100 text-rose-800">0</span>
+          </button>
+          <button data-filter="appointed" onclick="setFilter('appointed')" class="filter-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition bg-slate-100 text-slate-600 hover:bg-slate-200">
+            นัดหมายแล้ว <span id="count-appointed" class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-purple-100 text-purple-800">0</span>
+          </button>
         </nav>
 
         <!-- Search Box -->
@@ -562,6 +571,9 @@ Phone number: 089 000 0000" class="w-full p-3 text-sm border border-slate-300 ro
       document.getElementById("count-pending_call").textContent = leads.filter(l => !l.called).length;
       document.getElementById("count-called").textContent = leads.filter(l => l.called).length;
       document.getElementById("count-emailed").textContent = leads.filter(l => l.emailed).length;
+      document.getElementById("count-interested").textContent = leads.filter(l => l.interestStatus === "interested").length;
+      document.getElementById("count-not_interested").textContent = leads.filter(l => l.interestStatus === "not_interested").length;
+      document.getElementById("count-appointed").textContent = leads.filter(l => Boolean(l.appointed)).length;
 
       const query = document.getElementById("searchInput").value.trim().toLowerCase();
 
@@ -569,6 +581,9 @@ Phone number: 089 000 0000" class="w-full p-3 text-sm border border-slate-300 ro
         if (currentFilter === "pending_call" && lead.called) return false;
         if (currentFilter === "called" && !lead.called) return false;
         if (currentFilter === "emailed" && !lead.emailed) return false;
+        if (currentFilter === "interested" && lead.interestStatus !== "interested") return false;
+        if (currentFilter === "not_interested" && lead.interestStatus !== "not_interested") return false;
+        if (currentFilter === "appointed" && !lead.appointed) return false;
 
         if (query) {
           const hay = [
