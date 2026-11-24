@@ -70,9 +70,8 @@
         </div>
       </div>
 
-      <!-- Filter Tabs & Search -->
+      <!-- Filter Tabs (4 Menus) & Search -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-3 border-t border-slate-100">
-        <!-- 4 Top Filter Menus -->
         <nav class="flex flex-wrap gap-1.5" id="filterTabs">
           <button data-filter="all" onclick="setFilter('all')" class="filter-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition bg-slate-900 text-white">
             ทั้งหมด <span id="count-all" class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-white/20">0</span>
@@ -80,26 +79,17 @@
           <button data-filter="pending_call" onclick="setFilter('pending_call')" class="filter-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition bg-slate-100 text-slate-600 hover:bg-slate-200">
             รอโทร <span id="count-pending_call" class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-amber-100 text-amber-800">0</span>
           </button>
-          <button data-filter="called" onclick="setFilter('called')" class="filter-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition bg-slate-100 text-slate-600 hover:bg-slate-200">
-            โทรแล้ว <span id="count-called" class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-800">0</span>
-          </button>
-          <button data-filter="emailed" onclick="setFilter('emailed')" class="filter-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition bg-slate-100 text-slate-600 hover:bg-slate-200">
-            ส่งอีเมล์แล้ว <span id="count-emailed" class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800">0</span>
-          </button>
-          <button data-filter="interested" onclick="setFilter('interested')" class="filter-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition bg-slate-100 text-slate-600 hover:bg-slate-200">
-            สนใจ <span id="count-interested" class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-800">0</span>
-          </button>
-          <button data-filter="not_interested" onclick="setFilter('not_interested')" class="filter-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition bg-slate-100 text-slate-600 hover:bg-slate-200">
-            ไม่สนใจ <span id="count-not_interested" class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-rose-100 text-rose-800">0</span>
-          </button>
           <button data-filter="appointed" onclick="setFilter('appointed')" class="filter-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition bg-slate-100 text-slate-600 hover:bg-slate-200">
             นัดหมายแล้ว <span id="count-appointed" class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-purple-100 text-purple-800">0</span>
+          </button>
+          <button data-filter="followup" onclick="setFilter('followup')" class="filter-btn px-3.5 py-1.5 rounded-lg text-sm font-medium transition bg-slate-100 text-slate-600 hover:bg-slate-200">
+            ติดตาม <span id="count-followup" class="ml-1 px-1.5 py-0.5 text-xs rounded-full bg-amber-100 text-amber-800">0</span>
           </button>
         </nav>
 
         <!-- Search Box -->
         <div class="relative w-full sm:w-72">
-          <input type="text" id="searchInput" oninput="renderLeads()" placeholder="ค้นหาชื่อ, เบอร์โทร, อีเมล, โน้ต..." class="w-full pl-9 pr-3 py-1.5 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition" />
+          <input type="text" id="searchInput" oninput="renderLeads()" placeholder="ค้นหาชื่อ, บริษัท, เบอร์โทร, โน้ต..." class="w-full pl-9 pr-3 py-1.5 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition" />
           <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
         </div>
       </div>
@@ -133,7 +123,7 @@
       <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
         <div>
           <h2 class="text-lg font-bold text-slate-900">เพิ่มลูกค้าใหม่ (วางข้อความที่ลูกค้าทักเข้ามา)</h2>
-          <p class="text-xs text-slate-500">ก๊อปปี้ข้อความจากแชทหรือฟอร์มมาวางฝั่งซ้าย ระบบจะแยกข้อมูลให้อัตโนมัติ</p>
+          <p class="text-xs text-slate-500">ก๊อปปี้ข้อความจากแชทหรือฟอร์มมาวางฝั่งซ้าย ระบบจะแยกข้อมูลและคำนวณ Financial Gap อัตโนมัติ</p>
         </div>
         <button onclick="closeAddModal()" class="text-slate-400 hover:text-slate-600 p-1">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -147,17 +137,20 @@
             <label class="text-sm font-semibold text-slate-700">1. วางข้อความต้นฉบับที่นี่</label>
             <button type="button" onclick="fillSampleText()" class="text-xs text-emerald-600 hover:underline font-medium">ใส่ข้อความตัวอย่าง</button>
           </div>
-          <textarea id="rawPasteInput" oninput="parseRawText(this.value)" rows="14" placeholder="วางข้อความลูกค้า เช่น:
+          <textarea id="rawPasteInput" oninput="parseRawText(this.value)" rows="16" placeholder="วางข้อความลูกค้า เช่น:
 คุณสนใจวางแผนเรื่องใด?: จัดสวัสดิการประกันชีวิตให้กรรมการ
-ปัจจุบันคุณมีบทบาทใดในกิจการ?: กรรมการบริษัท
+ปัจจุบันคุณมีบทบาทใดในกิจการ?: กรรมการบริษัท / กรรมการผู้จัดการ
 Email: example@gmail.com
 Full name: ชื่อ นามสกุล
-Phone number: 089 000 0000" class="w-full p-3 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 focus:bg-white font-normal leading-relaxed"></textarea>
+Phone number: 089 000 0000
+Company: บริษัท ตัวอย่าง จำกัด
+รายได้: 10000000
+รายจ่ายรวม: 7000000" class="w-full p-3 text-sm border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 focus:bg-white font-normal leading-relaxed"></textarea>
         </div>
 
         <!-- Right: Parsed Preview Form -->
         <div class="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
-          <div class="text-sm font-semibold text-slate-700 border-b border-slate-200 pb-2">2. ตรวจสอบข้อมูลที่แยกได้</div>
+          <div class="text-sm font-semibold text-slate-700 border-b border-slate-200 pb-2">2. ตรวจสอบข้อมูลและ Financial Gap</div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
@@ -165,31 +158,50 @@ Phone number: 089 000 0000" class="w-full p-3 text-sm border border-slate-300 ro
               <input type="text" id="parseFullName" class="w-full px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
             </div>
             <div>
-              <label class="block text-xs font-medium text-slate-600 mb-1">เบอร์โทรศัพท์</label>
-              <input type="text" id="parsePhone" class="w-full px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              <label class="block text-xs font-medium text-slate-600 mb-1">Company (ชื่อบริษัท)</label>
+              <input type="text" id="parseCompany" class="w-full px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
             </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">เบอร์โทรศัพท์</label>
+              <input type="text" id="parsePhone" class="w-full px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            </div>
             <div>
               <label class="block text-xs font-medium text-slate-600 mb-1">อีเมล</label>
               <input type="email" id="parseEmail" class="w-full px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
             </div>
-            <div>
-              <label class="block text-xs font-medium text-slate-600 mb-1">บทบาทในกิจการ</label>
-              <input type="text" id="parseRole" class="w-full px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-            </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-medium text-slate-600 mb-1">สวัสดิการประกันชีวิตเดิม</label>
-              <input type="text" id="parseExistingBenefit" class="w-full px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              <label class="block text-xs font-medium text-slate-600 mb-1">บทบาทในกิจการ</label>
+              <input type="text" id="parseRole" class="w-full px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
             </div>
             <div>
-              <label class="block text-xs font-medium text-slate-600 mb-1">รูปแบบการรับข้อมูล</label>
-              <input type="text" id="parsePreferredContact" class="w-full px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+              <label class="block text-xs font-medium text-slate-600 mb-1">สวัสดิการเดิม / รูปแบบรับข้อมูล</label>
+              <input type="text" id="parseExistingBenefit" class="w-full px-3 py-1.5 text-sm bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500" />
             </div>
+          </div>
+
+          <!-- Revenue, Expense & Calculated Financial Gap -->
+          <div class="p-3 rounded-xl bg-white border border-slate-200 space-y-2.5">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-medium text-slate-600 mb-1">รายได้ (บาท)</label>
+                <input type="text" id="parseRevenue" oninput="recalcModalGap()" placeholder="เช่น 10000000" class="w-full px-3 py-1.5 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white" />
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-slate-600 mb-1">รายจ่ายรวม (บาท)</label>
+                <input type="text" id="parseExpense" oninput="recalcModalGap()" placeholder="เช่น 7000000" class="w-full px-3 py-1.5 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white" />
+              </div>
+            </div>
+            <div class="flex items-center justify-between pt-2 border-t border-slate-100">
+              <span class="text-xs font-semibold text-slate-600">Financial Gap (คำนวณอัตโนมัติ):</span>
+              <span id="parseFinancialGapPreview" class="text-sm font-bold text-emerald-700">-</span>
+            </div>
+            <div class="text-[11px] text-slate-400">สูตร: (96 - (รายจ่ายรวม / รายได้ * 100)) * รายได้ / 100</div>
           </div>
 
           <div>
@@ -266,17 +278,56 @@ Phone number: 089 000 0000" class="w-full p-3 text-sm border border-slate-300 ro
     const DEFAULT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx4ddZTBAv-tpACMilYp10bIwTollc3XpghSJHHyHNA6ILwpDe6knmbXpad5qvh7bBNmA/exec";
 
     const STORAGE_KEY_URL = "lead_dashboard_gas_url_v1";
-    const STORAGE_KEY_LOCAL_DATA = "lead_dashboard_local_data_v1";
+    const STORAGE_KEY_LOCAL_DATA = "lead_dashboard_local_data_v3";
 
     let leads = [];
     let currentFilter = "all";
     let parsedInterests = [];
+    let parsedPreferredContact = "";
     let isTypingNote = false;
     let autoSyncTimer = null;
 
     function getScriptUrl() {
       const saved = localStorage.getItem(STORAGE_KEY_URL);
       return (saved !== null ? saved : DEFAULT_SCRIPT_URL).trim();
+    }
+
+    // =========================================================================
+    // สูตรคำนวณ Financial Gap = (96 - (รายจ่ายรวม / รายได้ * 100)) * รายได้ / 100
+    // =========================================================================
+    function parseNumber(val) {
+      if (typeof val === "number") return Number.isFinite(val) ? val : null;
+      if (!val) return null;
+      const cleaned = String(val).replace(/[^0-9.-]/g, "");
+      if (!cleaned || cleaned === "-" || cleaned === ".") return null;
+      const num = parseFloat(cleaned);
+      return Number.isFinite(num) ? num : null;
+    }
+
+    function calculateFinancialGap(revenueRaw, expenseRaw) {
+      const rev = parseNumber(revenueRaw);
+      const exp = parseNumber(expenseRaw);
+      if (rev === null || exp === null || rev === 0) return null;
+      return ((96 - (exp / rev) * 100) * rev) / 100;
+    }
+
+    function formatCurrency(num) {
+      if (num === null || num === undefined || !Number.isFinite(num)) return "-";
+      return num.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " บาท";
+    }
+
+    function recalcModalGap() {
+      const rev = document.getElementById("parseRevenue").value;
+      const exp = document.getElementById("parseExpense").value;
+      const gap = calculateFinancialGap(rev, exp);
+      const el = document.getElementById("parseFinancialGapPreview");
+      if (gap === null) {
+        el.textContent = "-";
+        el.className = "text-sm font-bold text-slate-400";
+      } else {
+        el.textContent = formatCurrency(gap);
+        el.className = "text-sm font-bold " + (gap >= 0 ? "text-emerald-700" : "text-rose-600");
+      }
     }
 
     // =========================================================================
@@ -287,7 +338,6 @@ Phone number: 089 000 0000" class="w-full p-3 text-sm border border-slate-300 ro
       updateSyncStatusUI(url);
 
       if (!url) {
-        // โหมดทดลองในเครื่อง (Local Storage)
         const localRaw = localStorage.getItem(STORAGE_KEY_LOCAL_DATA);
         if (localRaw) {
           leads = JSON.parse(localRaw);
@@ -354,7 +404,6 @@ Phone number: 089 000 0000" class="w-full p-3 text-sm border border-slate-300 ro
       if (!confirm("ต้องการลบข้อมูลลูกค้ารายนี้ออกจากระบบใช่หรือไม่?")) return;
       const url = getScriptUrl();
 
-      // Optimistic UI remove
       const backup = [...leads];
       leads = leads.filter(l => l.id !== id);
       renderLeads();
@@ -382,13 +431,12 @@ Phone number: 089 000 0000" class="w-full p-3 text-sm border border-slate-300 ro
     }
 
     // =========================================================================
-    // 3. การอัปเดตสถานะ 5 รายการบนการ์ดลูกค้า
+    // 3. การอัปเดตสถานะบนการ์ดลูกค้า
     // =========================================================================
     async function toggleField(id, field) {
       const lead = leads.find(l => l.id === id);
       if (!lead) return;
       const updated = { ...lead, [field]: !lead[field] };
-      // Optimistic update
       Object.assign(lead, updated);
       renderLeads();
       try {
@@ -444,6 +492,9 @@ Phone number: 089 000 0000" class="w-full p-3 text-sm border border-slate-300 ro
       let existingBenefit = "";
       let fullName = "";
       let phone = "";
+      let company = "";
+      let revenue = "";
+      let expense = "";
 
       for (const line of lines) {
         const sepIdx = line.indexOf(":");
@@ -462,22 +513,33 @@ Phone number: 089 000 0000" class="w-full p-3 text-sm border border-slate-300 ro
           email = val;
         } else if (key.includes("สวัสดิการ") || key.includes("อยู่แล้วหรือไม่")) {
           existingBenefit = val;
-        } else if (key.includes("full name") || key.includes("ชื่อ")) {
+        } else if (key.includes("full name") || key.includes("ชื่อ-นามสกุล") || key === "ชื่อ") {
           fullName = val;
         } else if (key.includes("phone") || key.includes("เบอร์") || key.includes("โทร")) {
           phone = val;
+        } else if (key.includes("company") || key.includes("บริษัท")) {
+          company = val;
+        } else if (key.includes("รายได้")) {
+          revenue = val;
+        } else if (key.includes("รายจ่าย")) {
+          expense = val;
         }
       }
 
+      parsedPreferredContact = preferredContact;
+
       document.getElementById("parseFullName").value = fullName;
+      document.getElementById("parseCompany").value = company;
       document.getElementById("parsePhone").value = phone;
       document.getElementById("parseEmail").value = email;
       document.getElementById("parseRole").value = role;
-      document.getElementById("parseExistingBenefit").value = existingBenefit;
-      document.getElementById("parsePreferredContact").value = preferredContact;
+      document.getElementById("parseExistingBenefit").value = existingBenefit || preferredContact;
+      document.getElementById("parseRevenue").value = revenue;
+      document.getElementById("parseExpense").value = expense;
 
       parsedInterests = interests;
       renderParsedInterests();
+      recalcModalGap();
     }
 
     function renderParsedInterests() {
@@ -520,20 +582,29 @@ Phone number: 089 000 0000" class="w-full p-3 text-sm border border-slate-300 ro
       btn.disabled = true;
       btn.textContent = "กำลังบันทึก...";
 
+      const revenueVal = document.getElementById("parseRevenue").value.trim();
+      const expenseVal = document.getElementById("parseExpense").value.trim();
+      const financialGap = calculateFinancialGap(revenueVal, expenseVal);
+
       const newLead = {
         id: "lead_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
         createdAt: new Date().toISOString(),
         fullName,
+        company: document.getElementById("parseCompany").value.trim(),
         phone: document.getElementById("parsePhone").value.trim(),
         email: document.getElementById("parseEmail").value.trim(),
         interests: [...parsedInterests],
         role: document.getElementById("parseRole").value.trim(),
         existingBenefit: document.getElementById("parseExistingBenefit").value.trim(),
-        preferredContact: document.getElementById("parsePreferredContact").value.trim(),
+        preferredContact: parsedPreferredContact || "",
+        revenue: revenueVal,
+        expense: expenseVal,
+        financialGap: financialGap,
         called: false,
         emailed: false,
         interestStatus: "pending",
         appointed: false,
+        followup: false,
         notes: "",
         rawText: document.getElementById("rawPasteInput").value.trim()
       };
@@ -551,8 +622,12 @@ Phone number: 089 000 0000" class="w-full p-3 text-sm border border-slate-300 ro
     }
 
     // =========================================================================
-    // 5. การแสดงผลและการกรองข้อมูล (Filter & Render)
+    // 5. การแสดงผลและการกรองข้อมูล (4 Filters: ทั้งหมด / รอโทร / นัดหมายแล้ว / ติดตาม)
     // =========================================================================
+    function isFollowupLead(lead) {
+      return Boolean(lead.followup);
+    }
+
     function setFilter(filter) {
       currentFilter = filter;
       document.querySelectorAll(".filter-btn").forEach(btn => {
@@ -566,28 +641,22 @@ Phone number: 089 000 0000" class="w-full p-3 text-sm border border-slate-300 ro
     }
 
     function renderLeads() {
-      // Update counters
       document.getElementById("count-all").textContent = leads.length;
       document.getElementById("count-pending_call").textContent = leads.filter(l => !l.called).length;
-      document.getElementById("count-called").textContent = leads.filter(l => l.called).length;
-      document.getElementById("count-emailed").textContent = leads.filter(l => l.emailed).length;
-      document.getElementById("count-interested").textContent = leads.filter(l => l.interestStatus === "interested").length;
-      document.getElementById("count-not_interested").textContent = leads.filter(l => l.interestStatus === "not_interested").length;
       document.getElementById("count-appointed").textContent = leads.filter(l => Boolean(l.appointed)).length;
+      document.getElementById("count-followup").textContent = leads.filter(l => isFollowupLead(l)).length;
 
       const query = document.getElementById("searchInput").value.trim().toLowerCase();
 
       const filtered = leads.filter(lead => {
         if (currentFilter === "pending_call" && lead.called) return false;
-        if (currentFilter === "called" && !lead.called) return false;
-        if (currentFilter === "emailed" && !lead.emailed) return false;
-        if (currentFilter === "interested" && lead.interestStatus !== "interested") return false;
-        if (currentFilter === "not_interested" && lead.interestStatus !== "not_interested") return false;
         if (currentFilter === "appointed" && !lead.appointed) return false;
+        if (currentFilter === "followup" && !isFollowupLead(lead)) return false;
 
         if (query) {
           const hay = [
             lead.fullName,
+            lead.company,
             lead.phone,
             lead.email,
             lead.role,
@@ -626,6 +695,13 @@ Phone number: 089 000 0000" class="w-full p-3 text-sm border border-slate-300 ro
           ? activeClasses + " font-semibold shadow-sm"
           : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50";
 
+      const gapVal = (lead.financialGap !== undefined && lead.financialGap !== null && lead.financialGap !== "")
+        ? parseNumber(lead.financialGap)
+        : calculateFinancialGap(lead.revenue, lead.expense);
+
+      const revNum = parseNumber(lead.revenue);
+      const expNum = parseNumber(lead.expense);
+
       return `
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition p-5 flex flex-col justify-between gap-4">
           <!-- Card Header -->
@@ -634,6 +710,7 @@ Phone number: 089 000 0000" class="w-full p-3 text-sm border border-slate-300 ro
               <div>
                 <div class="flex items-center gap-2 flex-wrap">
                   <h3 class="text-lg font-bold text-slate-900">${escapeHtml(lead.fullName)}</h3>
+                  ${lead.company ? `<span class="px-2.5 py-0.5 text-xs font-semibold rounded-md bg-blue-50 text-blue-700 border border-blue-200">${escapeHtml(lead.company)}</span>` : ""}
                   ${lead.role ? `<span class="px-2 py-0.5 text-xs font-medium rounded-md bg-slate-100 text-slate-700">${escapeHtml(lead.role)}</span>` : ""}
                 </div>
                 <div class="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-sm text-slate-600">
@@ -668,15 +745,19 @@ Phone number: 089 000 0000" class="w-full p-3 text-sm border border-slate-300 ro
               </div>
             </div>
 
-            <!-- Metadata Badges -->
-            <div class="grid grid-cols-2 gap-2 mt-3 p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs">
+            <!-- Financial Summary Box: รายได้ / รายจ่ายรวม / Financial Gap -->
+            <div class="grid grid-cols-3 gap-2 mt-3 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs">
               <div>
-                <span class="text-slate-400 block">สวัสดิการเดิม:</span>
-                <span class="font-medium text-slate-700">${escapeHtml(lead.existingBenefit || "-")}</span>
+                <span class="text-slate-400 block">รายได้:</span>
+                <span class="font-semibold text-slate-800">${revNum !== null ? revNum.toLocaleString("th-TH") : "-"}</span>
               </div>
               <div>
-                <span class="text-slate-400 block">รูปแบบที่ต้องการ:</span>
-                <span class="font-medium text-slate-700">${escapeHtml(lead.preferredContact || "-")}</span>
+                <span class="text-slate-400 block">รายจ่ายรวม:</span>
+                <span class="font-semibold text-slate-800">${expNum !== null ? expNum.toLocaleString("th-TH") : "-"}</span>
+              </div>
+              <div class="bg-white rounded-lg p-1.5 border border-slate-200/70">
+                <span class="text-[11px] text-slate-500 block">Financial Gap:</span>
+                <span class="font-bold ${gapVal === null ? 'text-slate-400' : (gapVal >= 0 ? 'text-emerald-700' : 'text-rose-600')}">${gapVal !== null ? gapVal.toLocaleString("th-TH", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "-"}</span>
               </div>
             </div>
 
@@ -687,27 +768,32 @@ Phone number: 089 000 0000" class="w-full p-3 text-sm border border-slate-300 ro
             </div>
           </div>
 
-          <!-- Tracking Controls (5 Items) -->
+          <!-- Tracking Controls -->
           <div class="pt-3 border-t border-slate-100 space-y-3">
-            <!-- Checkboxes: 1. โทรแล้ว | 2. ส่งอีเมล์แล้ว | 4. นัดหมายแล้ว -->
-            <div class="grid grid-cols-3 gap-2">
-              <label class="flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl border text-xs font-medium cursor-pointer select-none transition ${lead.called ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}">
+            <!-- Checkboxes: โทรแล้ว | ส่งอีเมล์แล้ว | นัดหมายแล้ว | ติดตาม -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <label class="flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl border text-xs font-medium cursor-pointer select-none transition ${lead.called ? 'bg-emerald-50 border-emerald-300 text-emerald-800' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}">
                 <input type="checkbox" ${lead.called ? "checked" : ""} onchange="toggleField('${lead.id}', 'called')" class="rounded text-emerald-600 focus:ring-emerald-500" />
                 <span>โทรแล้ว</span>
               </label>
 
-              <label class="flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl border text-xs font-medium cursor-pointer select-none transition ${lead.emailed ? 'bg-blue-50 border-blue-300 text-blue-800' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}">
+              <label class="flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl border text-xs font-medium cursor-pointer select-none transition ${lead.emailed ? 'bg-blue-50 border-blue-300 text-blue-800' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}">
                 <input type="checkbox" ${lead.emailed ? "checked" : ""} onchange="toggleField('${lead.id}', 'emailed')" class="rounded text-blue-600 focus:ring-blue-500" />
                 <span>ส่งอีเมล์แล้ว</span>
               </label>
 
-              <label class="flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl border text-xs font-medium cursor-pointer select-none transition ${lead.appointed ? 'bg-purple-50 border-purple-300 text-purple-800' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}">
+              <label class="flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl border text-xs font-medium cursor-pointer select-none transition ${lead.appointed ? 'bg-purple-50 border-purple-300 text-purple-800' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}">
                 <input type="checkbox" ${lead.appointed ? "checked" : ""} onchange="toggleField('${lead.id}', 'appointed')" class="rounded text-purple-600 focus:ring-purple-500" />
                 <span>นัดหมายแล้ว</span>
               </label>
+
+              <label class="flex items-center justify-center gap-1.5 px-2 py-2 rounded-xl border text-xs font-medium cursor-pointer select-none transition ${lead.followup ? 'bg-amber-50 border-amber-300 text-amber-800' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}">
+                <input type="checkbox" ${lead.followup ? "checked" : ""} onchange="toggleField('${lead.id}', 'followup')" class="rounded text-amber-600 focus:ring-amber-500" />
+                <span>ติดตาม</span>
+              </label>
             </div>
 
-            <!-- 3. สนใจ / ไม่สนใจ -->
+            <!-- สนใจ / ไม่สนใจ -->
             <div class="flex items-center justify-between gap-2">
               <span class="text-xs font-medium text-slate-500">ผลการติดตาม:</span>
               <div class="inline-flex rounded-lg border border-slate-200 p-0.5 bg-slate-50">
@@ -717,7 +803,7 @@ Phone number: 089 000 0000" class="w-full p-3 text-sm border border-slate-300 ro
               </div>
             </div>
 
-            <!-- 5. ช่องเพิ่มเติมข้อความหลังโทรคุย -->
+            <!-- ช่องเพิ่มเติมข้อความหลังโทรคุย -->
             <div>
               <div class="flex items-center justify-between mb-1">
                 <label class="text-xs font-medium text-slate-500">บันทึกเพิ่มเติมหลังโทรคุย:</label>
@@ -756,7 +842,10 @@ Phone number: 089 000 0000" class="w-full p-3 text-sm border border-slate-300 ro
 Email: Mr.chatchait@gmail.com
 บริษัทมีการจัดสวัสดิการประกันชีวิตให้กรรมการอยู่แล้วหรือไม่?: ยังไม่มี
 Full name: ฉัตรชัย เทิดสุขบดี
-Phone number: 089 024 6379`;
+Phone number: 089 024 6379
+Company: บริษัท เทิดสุขบดี เทรดดิ้ง จำกัด
+รายได้: 12000000
+รายจ่ายรวม: 8400000`;
       document.getElementById("rawPasteInput").value = sample;
       parseRawText(sample);
     }
@@ -846,11 +935,14 @@ Phone number: 089 024 6379`;
     }
 
     function getInitialSampleLeads() {
+      const rev = 10000000;
+      const exp = 7000000;
       return [
         {
           id: "lead_sample_1",
           createdAt: new Date().toISOString(),
           fullName: "ฉัตรชัย เทิดสุขบดี",
+          company: "บริษัท ตัวอย่าง จำกัด",
           phone: "089 024 6379",
           email: "Mr.chatchait@gmail.com",
           interests: [
@@ -862,12 +954,16 @@ Phone number: 089 024 6379`;
           role: "กรรมการบริษัท / กรรมการผู้จัดการ",
           existingBenefit: "ยังไม่มี",
           preferredContact: "นัดหมายพูดคุยรายละเอียด",
+          revenue: rev,
+          expense: exp,
+          financialGap: calculateFinancialGap(rev, exp),
           called: false,
           emailed: false,
           interestStatus: "pending",
           appointed: false,
+          followup: false,
           notes: "",
-          rawText: `คุณสนใจวางแผนเรื่องใด?: จัดสวัสดิการประกันชีวิตให้กรรมการ\nคุณสนใจวางแผนเรื่องใด?: ต้องการศึกษาทั้งหมด\nคุณสนใจวางแผนเรื่องใด?: วางแผนเงินเกษียณหรือมรดกให้กรรมการ\nคุณสนใจวางแผนเรื่องใด?: วางแผนภาษีและค่าใช้จ่ายบริษัท\nปัจจุบันคุณมีบทบาทใดในกิจการ?: กรรมการบริษัท / กรรมการผู้จัดการ\nต้องการรับข้อมูลในรูปแบบใด?: นัดหมายพูดคุยรายละเอียด\nEmail: Mr.chatchait@gmail.com\nบริษัทมีการจัดสวัสดิการประกันชีวิตให้กรรมการอยู่แล้วหรือไม่?: ยังไม่มี\nFull name: ฉัตรชัย เทิดสุขบดี\nPhone number: 089 024 6379`
+          rawText: `คุณสนใจวางแผนเรื่องใด?: จัดสวัสดิการประกันชีวิตให้กรรมการ\nคุณสนใจวางแผนเรื่องใด?: ต้องการศึกษาทั้งหมด\nคุณสนใจวางแผนเรื่องใด?: วางแผนเงินเกษียณหรือมรดกให้กรรมการ\nคุณสนใจวางแผนเรื่องใด?: วางแผนภาษีและค่าใช้จ่ายบริษัท\nปัจจุบันคุณมีบทบาทใดในกิจการ?: กรรมการบริษัท / กรรมการผู้จัดการ\nต้องการรับข้อมูลในรูปแบบใด?: นัดหมายพูดคุยรายละเอียด\nEmail: Mr.chatchait@gmail.com\nบริษัทมีการจัดสวัสดิการประกันชีวิตให้กรรมการอยู่แล้วหรือไม่?: ยังไม่มี\nFull name: ฉัตรชัย เทิดสุขบดี\nPhone number: 089 024 6379\nCompany: บริษัท ตัวอย่าง จำกัด\nรายได้: 10000000\nรายจ่ายรวม: 7000000`
         }
       ];
     }
